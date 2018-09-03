@@ -22,7 +22,7 @@ def compute_distances(Xtrain, X):
 	  is the Euclidean distance between the ith test point and the jth training
 	  point.
 	"""
-	dists = []
+	dists = np.zeros(shape=(len(X), len(Xtrain)))
 	for i in range(len(X)):
 		for j in range(len(Xtrain)):
 			distanceSquareSum = 0
