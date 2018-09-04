@@ -63,7 +63,7 @@ def tune_lambda(Xtrain, ytrain, Xval, yval, lambds):
   for lambd in lambds:
     w = regularized_linear_regression(Xtrain, ytrain, lambd)
     err = test_error(w, Xval, yval)
-    if (err < trainingError || trainingError == -1):
+    if (err < trainingError or trainingError == -1):
       trainingError = err
       bestlambda = lambd
   return bestlambda
