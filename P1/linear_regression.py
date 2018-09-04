@@ -59,9 +59,13 @@ def tune_lambda(Xtrain, ytrain, Xval, yval, lambds):
     Returns:
     - bestlambda: the best lambda you find in lambds
     """
-  #####################################################
-  #				 YOUR CODE HERE					                    #
-  #####################################################		 
+  trainingError = -1
+  for lambd in lambds:
+    w = regularized_linear_regression(Xtrain, ytrain, lambd)
+    err = test_error(w, Xval, yval)
+    if (err < trainingError || trainingError == -1):
+      trainingError = err
+      bestlambda = lambd
   return bestlambda
 
 ###### Q4.4 ######
