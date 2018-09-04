@@ -25,10 +25,8 @@ def compute_distances(Xtrain, X):
 	dists = np.zeros(shape=(len(X), len(Xtrain)))
 	for i in range(len(X)):
 		for j in range(len(Xtrain)):
-			distanceSquareSum = 0
-			for d in range(len(X[0])):
-				distanceSquareSum += pow(X[i][d] - Xtrain[j][d], 2)
-			dists[i][j] = np.sqrt(distanceSquareSum)
+			dists[i][j] = np.linalg.norm(X[i]-Xtrain[j])
+	print(dists)
 	return dists
 
 ###### Q5.2 ######
