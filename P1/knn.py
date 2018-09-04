@@ -45,9 +45,9 @@ def predict_labels(k, ytrain, dists):
 	"""
 	ypred = np.zeros(shape=(len(dists)))
 	for i in range(len(dists)):
-		nearestKTrainingPoints = dists[i].argsort()[:k] """ gives the k nearest points """
+		nearestKTrainingPoints = dists[i].argsort()[:k] # gives the k nearest points
 		nearestKLabels = [ytrain[pos] for pos in nearestKTrainingPoints]
-		ypred[i] = np.argmax(np.bincount(nearestKLabels)) """ picks the label with max occurrences """
+		ypred[i] = np.argmax(np.bincount(nearestKLabels)) # picks the label with max occurrences
 	return ypred
 
 ###### Q5.3 ######
