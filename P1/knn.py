@@ -22,9 +22,13 @@ def compute_distances(Xtrain, X):
 	  is the Euclidean distance between the ith test point and the jth training
 	  point.
 	"""
-	#####################################################
-	#				 YOUR CODE HERE					                    #
-	#####################################################		 
+	dists = []
+	for i in range(len(X)):
+		for j in range(len(Xtrain)):
+			distanceSquareSum = 0
+			for d in range(len(X[0])):
+				distanceSquareSum += pow(X[i][d] - Xtrain[j][d], 2)
+			dists[i][j] = np.sqrt(distanceSquareSum)
 	return dists
 
 ###### Q5.2 ######
