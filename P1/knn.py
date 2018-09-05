@@ -26,7 +26,6 @@ def compute_distances(Xtrain, X):
 	for i in range(len(X)):
 		for j in range(len(Xtrain)):
 			dists[i][j] = np.linalg.norm(X[i]-Xtrain[j])
-	print(dists)
 	return dists
 
 ###### Q5.2 ######
@@ -44,9 +43,11 @@ def predict_labels(k, ytrain, dists):
 	- ypred: A numpy array of shape (num_test,) containing predicted labels for the
 	  test data, where y[i] is the predicted label for the test point X[i]. 
 	"""
-	#####################################################
-	#				 YOUR CODE HERE					                    #
-	#####################################################
+	ypred = np.zeros(shape=(len(dists)))
+	for i in range(len(dists)):
+		nearestKTrainingPoints = dists[i].argsort()[:k] """ gives the k nearest points """
+		nearestKLabels = [ytrain[pos] for pos in nearestKTrainingPoints]
+		ypred[i] = np.argmax(np.bincount(nearestKLabels)) """ picks the label with max occurrences """
 	return ypred
 
 ###### Q5.3 ######
