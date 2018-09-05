@@ -39,23 +39,18 @@ def binary_train(X, y, w0=None, b0=None, step_size=0.5, max_iterations=1000):
     if b0 is not None:
         b = b0
 
-    # Since y can be 0,1 and not -1,1 we need to adjust the formula for z from yi(wTxi+b) to -|yi-(wTx + b)|
-
+    y = np.asarray(y)
     for iteration in range(max_iterations):
         wT = np.transpose(w)
         sumFw = 0
         sumFb = 0
         for test in range(N):
-            diff = y[test] - (np.dot(wT, X[test]) + b)
-            z = -abs(diff)
-            dzbydw = np.dot(-z, X[test]) / diff
-            sumFw += dzbydw
-            dzbydb = -z / diff
-            sumFb += dzbydb
-        w += step_size * sumFw
-        b += step_size * sumFb
-
-
+            wTxplusb = np.inner(X[test], wT) + b
+            sig = sigmoid(wTxplusb)
+            sumFw += np.dot(sig - y[test],  X[test])
+            sumFb += sig - y[test]
+        w -= step_size * sumFw / N
+        b -= step_size * sumFb / N
     assert w.shape == (D,)
     return w, b
 
@@ -70,10 +65,11 @@ def binary_predict(X, w, b):
     - preds: N dimensional vector of binary predictions: {0, 1}
     """
     N, D = X.shape
-    preds = np.zeros(N) 
+    preds = np.zeros(N)
 
 
-    preds = np.add(np.matmul(np.transpose(w), X), b)
+    preds = np.sign(np.matmul(X, w) + b)
+    preds[preds < 0] = 0
     assert preds.shape == (N,) 
     return preds
 
