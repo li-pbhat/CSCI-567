@@ -68,8 +68,7 @@ def binary_predict(X, w, b):
     preds = np.zeros(N)
 
 
-    preds = np.sign(np.matmul(X, w) + b)
-    preds[preds < 0] = 0
+    preds = np.where(np.matmul(X, w) + b > 0.5, 1, 0)
     assert preds.shape == (N,) 
     return preds
 
@@ -183,9 +182,7 @@ def OVR_train(X, y, C, w0=None, b0=None, step_size=0.5, max_iterations=1000):
         b = b0
 
     for c in range(C):
-        y_c = np.copy(y)
-        y_c[y_c != c] = 0
-        y_c[y_c == c] = 1
+        y_c = np.where(y == c, 1, 0)
         w[c], b[c] = binary_train(X, y_c, w[c], b[c], step_size, max_iterations)
     assert w.shape == (C, D), 'wrong shape of weights matrix'
     assert b.shape == (C,), 'wrong shape of bias terms vector'
@@ -214,7 +211,7 @@ def OVR_predict(X, w, b):
     
     preds_c = np.zeros((C, N))
     for c in range(C):
-        preds_c[c] = np.matmul(X, w[c]) + b[c])
+        preds_c[c] = np.matmul(X, w[c] + b[c])
     preds = np.argmax(preds_c, axis=0)
     assert preds.shape == (N,)
     return preds
@@ -282,13 +279,13 @@ def run_multiclass():
             (accuracy_score(y_train, train_preds),
              accuracy_score(y_test, preds)))
     
-        print('Multinomial:')
-        w, b = multinomial_train(X_train, y_train, C=num_classes)
-        train_preds = multinomial_predict(X_train, w=w, b=b)
-        preds = multinomial_predict(X_test, w=w, b=b)
-        print('train acc: %f, test acc: %f' % 
-            (accuracy_score(y_train, train_preds),
-             accuracy_score(y_test, preds)))
+        # print('Multinomial:')
+        # w, b = multinomial_train(X_train, y_train, C=num_classes)
+        # train_preds = multinomial_predict(X_train, w=w, b=b)
+        # preds = multinomial_predict(X_test, w=w, b=b)
+        # print('train acc: %f, test acc: %f' % 
+        #     (accuracy_score(y_train, train_preds),
+        #      accuracy_score(y_test, preds)))
 
 
 if __name__ == '__main__':
