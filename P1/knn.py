@@ -62,9 +62,8 @@ def compute_accuracy(y, ypred):
 	Returns:
 	- acc: The accuracy of prediction (scalar).
 	"""
-	#####################################################
-	#				 YOUR CODE HERE					                    #
-	#####################################################
+	accuratePredictionCount = np.sum(y == ypred)
+	acc = accuratePredictionCount / len(y)
 	return acc
 
 ###### Q5.4 ######
@@ -84,10 +83,16 @@ def find_best_k(K, ytrain, dists, yval):
 	- best_k: The k with the highest validation accuracy.
 	- validation_accuracy: A list of accuracies of different ks in K.
 	"""
-	
-	#####################################################
-	#				 YOUR CODE HERE					                    #
-	#####################################################
+	validation_accuracy = []
+	best_k = None
+	best_acc = 0
+	for k in K:
+		ypred = predict_labels(k, ytrain, dists)
+		acc = compute_accuracy(yval, ypred)
+		validation_accuracy.append(acc)
+		if (acc > best_acc):
+			best_acc = acc
+			best_k = k
 	return best_k, validation_accuracy
 
 
