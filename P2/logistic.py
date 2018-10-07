@@ -42,13 +42,10 @@ def binary_train(X, y, w0=None, b0=None, step_size=0.5, max_iterations=1000):
     y = np.asarray(y)
     for iteration in range(max_iterations):
         wT = np.transpose(w)
-        sum_Fw = 0
-        sum_Fb = 0
-        for test in range(N):
-            wTxplusb = np.inner(X[test], wT) + b
-            sig = sigmoid(wTxplusb)
-            sum_Fw += np.dot(sig - y[test],  X[test])
-            sum_Fb += sig - y[test]
+        wTxplusb = np.matmul(X, w) + b
+        sig = map(sigmoid, wTxplusb)
+        sum_Fw = np.matmul(sig - y, X)
+        sum_Fb = sig - y
         w -= step_size * sum_Fw / N
         b -= step_size * sum_Fb / N
     assert w.shape == (D,)
@@ -68,7 +65,7 @@ def binary_predict(X, w, b):
     preds = np.zeros(N)
 
 
-    preds = np.where(np.matmul(X, w) + b > 0.5, 1, 0)
+    preds = np.where(np.matmul(X, w) + b >= 0, 1, 0)
     assert preds.shape == (N,) 
     return preds
 
