@@ -41,12 +41,13 @@ def binary_train(X, y, w0=None, b0=None, step_size=0.5, max_iterations=1000):
 
     y = np.asarray(y)
     for iteration in range(max_iterations):
-        wT = np.transpose(w)
-        wTxplusb = np.matmul(X, w) + b
+        wTxplusb = np.add(np.matmul(X, w), b)
         sigmoid_function = np.vectorize(sigmoid)
         sig = sigmoid_function(wTxplusb)
-        sum_Fw = np.matmul(sig - y, X)
-        sum_Fb = sig - y
+        sig_y = np.subtract(sig, y)
+        Xsig_y = X * sig_y[:, np.newaxis]
+        sum_Fw = Xsig_y.sum(axis=0)
+        sum_Fb = sig_y.sum(axis=0)
         w -= step_size * sum_Fw / N
         b -= step_size * sum_Fb / N
     assert w.shape == (D,)
