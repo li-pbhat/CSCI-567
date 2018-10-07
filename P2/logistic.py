@@ -42,15 +42,15 @@ def binary_train(X, y, w0=None, b0=None, step_size=0.5, max_iterations=1000):
     y = np.asarray(y)
     for iteration in range(max_iterations):
         wT = np.transpose(w)
-        sumFw = 0
-        sumFb = 0
+        sum_Fw = 0
+        sum_Fb = 0
         for test in range(N):
             wTxplusb = np.inner(X[test], wT) + b
             sig = sigmoid(wTxplusb)
-            sumFw += np.dot(sig - y[test],  X[test])
-            sumFb += sig - y[test]
-        w -= step_size * sumFw / N
-        b -= step_size * sumFb / N
+            sum_Fw += np.dot(sig - y[test],  X[test])
+            sum_Fb += sig - y[test]
+        w -= step_size * sum_Fw / N
+        b -= step_size * sum_Fb / N
     assert w.shape == (D,)
     return w, b
 
@@ -182,9 +182,11 @@ def OVR_train(X, y, C, w0=None, b0=None, step_size=0.5, max_iterations=1000):
     if b0 is not None:
         b = b0
 
-    """
-    TODO: add your code here
-    """
+    for c in range(C):
+        y_c = np.copy(y)
+        y_c[y_c != c] = 0
+        y_c[y_c == c] = 1
+        w[c], b[c] = binary_train(X, y_c, w[c], b[c], step_size, max_iterations)
     assert w.shape == (C, D), 'wrong shape of weights matrix'
     assert b.shape == (C,), 'wrong shape of bias terms vector'
     return w, b
@@ -210,10 +212,10 @@ def OVR_predict(X, w, b):
     C = w.shape[0]
     preds = np.zeros(N) 
     
-    """
-    TODO: add your code here
-    """
-
+    preds_c = np.zeros((C, N))
+    for c in range(C):
+        preds_c[c] = np.matmul(X, w[c]) + b[c])
+    preds = np.argmax(preds_c, axis=0)
     assert preds.shape == (N,)
     return preds
 
