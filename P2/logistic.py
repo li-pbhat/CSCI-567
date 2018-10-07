@@ -113,12 +113,12 @@ def multinomial_train(X, y, C,
         b = b0
 
 
-    y_one_hot = np.arrange(N, C)
-    y_one_hot[np.arrange(C), y] = 1
-    gradient = np.exp(np.matmul(X, w)) - y_one_hot
-    X_gradient = X * gradient
-    w = w - step_size * X_gradient.sum(axis=0) / N
-    b = b - step_size * gradient.sum(axis=0) / N
+    y_one_hot = np.zeros((N, C)) # NxC
+    y_one_hot[np.arange(N), y] = 1
+    gradient = np.exp(np.matmul(X, np.transpose(w))) - y_one_hot # NxC
+    X_gradient = np.matmul(np.transpose(X), gradient) / N  # DxC
+    w = w - step_size * np.transpose(X_gradient) # CxD
+    b = b - step_size * gradient.sum(axis=0) / N # Cx1
     assert w.shape == (C, D)
     assert b.shape == (C,)
     return w, b
@@ -143,7 +143,7 @@ def multinomial_predict(X, w, b):
     C = w.shape[0]
     preds = np.zeros(N) 
 
-    preds = np.argmax(np.matmul(X, w) + b, axis=1)
+    preds = np.argmax(np.matmul(X, np.transpose(w)) + b, axis=1)
 
     assert preds.shape == (N,)
     return preds
@@ -183,6 +183,7 @@ def OVR_train(X, y, C, w0=None, b0=None, step_size=0.5, max_iterations=1000):
     for c in range(C):
         y_c = np.where(y == c, 1, 0)
         w[c], b[c] = binary_train(X, y_c, w[c], b[c], step_size, max_iterations)
+
     assert w.shape == (C, D), 'wrong shape of weights matrix'
     assert b.shape == (C,), 'wrong shape of bias terms vector'
     return w, b
@@ -269,7 +270,7 @@ def run_multiclass():
     for data, name, num_classes in datasets:
         print('%s: %d class classification' % (name, num_classes))
         X_train, X_test, y_train, y_test = data
-        
+
         print('One-versus-rest:')
         w, b = OVR_train(X_train, y_train, C=num_classes)
         train_preds = OVR_predict(X_train, w=w, b=b)
@@ -277,14 +278,14 @@ def run_multiclass():
         print('train acc: %f, test acc: %f' % 
             (accuracy_score(y_train, train_preds),
              accuracy_score(y_test, preds)))
-    
-        # print('Multinomial:')
-        # w, b = multinomial_train(X_train, y_train, C=num_classes)
-        # train_preds = multinomial_predict(X_train, w=w, b=b)
-        # preds = multinomial_predict(X_test, w=w, b=b)
-        # print('train acc: %f, test acc: %f' % 
-        #     (accuracy_score(y_train, train_preds),
-        #      accuracy_score(y_test, preds)))
+        
+        print('Multinomial:')
+        w, b = multinomial_train(X_train, y_train, C=num_classes)
+        train_preds = multinomial_predict(X_train, w=w, b=b)
+        preds = multinomial_predict(X_test, w=w, b=b)
+        print('train acc: %f, test acc: %f' % 
+            (accuracy_score(y_train, train_preds),
+             accuracy_score(y_test, preds)))
 
 
 if __name__ == '__main__':
