@@ -43,7 +43,8 @@ def binary_train(X, y, w0=None, b0=None, step_size=0.5, max_iterations=1000):
     for iteration in range(max_iterations):
         wT = np.transpose(w)
         wTxplusb = np.matmul(X, w) + b
-        sig = map(sigmoid, wTxplusb)
+        sigmoid_function = np.vectorize(sigmoid)
+        sig = sigmoid_function(wTxplusb)
         sum_Fw = np.matmul(sig - y, X)
         sum_Fb = sig - y
         w -= step_size * sum_Fw / N
