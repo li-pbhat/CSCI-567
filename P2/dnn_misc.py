@@ -61,9 +61,9 @@ class linear_layer:
             - forward_output: A N-by-output_D numpy array, where each 'row' is an output example/instance.
         """
 
-        ################################################################################
-        # TODO: Implement the linear forward pass. Store the result in forward_output  #
-        ################################################################################
+        W = self.params['W']
+        b = self.params['b']
+        forward_output = np.matmul(X, W) + b
 
         return forward_output
 
@@ -97,6 +97,10 @@ class linear_layer:
         # backward_output = ? (N-by-input_D numpy array, the gradient of the mini-batch loss w.r.t. X)                           #
         # only return backward_output, but need to compute self.gradient['W'] and self.gradient['b']                             #
         ##########################################################################################################################
+        W = self.params['W']
+        self.gradient['W'] = np.matmul(np.transpose(X), grad) # inputDxoutputD
+        self.gradient['b'] = grad
+        backward_output = np.matmul(grad, np.transpose(W)) # NxinputD
 
         return backward_output
 
