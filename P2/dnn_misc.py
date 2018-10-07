@@ -90,13 +90,6 @@ class linear_layer:
                  w.r.t. X[i].
         """
 
-        ##########################################################################################################################
-        # TODO: Implement the backward pass (i.e., compute the following three terms)                                            #
-        # self.gradient['W'] = ? (input_D-by-output_D numpy array, the gradient of the mini-batch loss w.r.t. self.params['W'])  #
-        # self.gradient['b'] = ? (1-by-output_D numpy array, the gradient of the mini-batch loss w.r.t. self.params['b'])        #
-        # backward_output = ? (N-by-input_D numpy array, the gradient of the mini-batch loss w.r.t. X)                           #
-        # only return backward_output, but need to compute self.gradient['W'] and self.gradient['b']                             #
-        ##########################################################################################################################
         W = self.params['W']
         self.gradient['W'] = np.matmul(np.transpose(X), grad) # inputDxoutputD
         self.gradient['b'] = grad
@@ -137,10 +130,8 @@ class relu:
             - forward_output: A numpy array of the same shape of X
         """
 
-        ################################################################################
-        # TODO: Implement the relu forward pass. Store the result in forward_output    #
-        ################################################################################
-
+        forward_output = np.maximum(X, 0)
+        self.mask = forward_output
         return forward_output
 
     def backward(self, X, grad):
@@ -170,7 +161,8 @@ class relu:
         # backward_output = ? (A numpy array of the shape of X, the gradient of the mini-batch loss w.r.t. X)                    #
         # PLEASE follow the Heaviside step function defined in CSCI567_HW2.pdf                                                   #
         ##########################################################################################################################
-
+        Hx = np.where(X >= 0, 1, 0)
+        backward_output = np.matmul(grad, Hx)
         return backward_output
 
 
