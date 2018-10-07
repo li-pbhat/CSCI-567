@@ -156,13 +156,8 @@ class relu:
                  w.r.t. the corresponding element in  X.
         """
 
-        ##########################################################################################################################
-        # TODO: Implement the backward pass (i.e., compute the following term)                                                   #
-        # backward_output = ? (A numpy array of the shape of X, the gradient of the mini-batch loss w.r.t. X)                    #
-        # PLEASE follow the Heaviside step function defined in CSCI567_HW2.pdf                                                   #
-        ##########################################################################################################################
         Hx = np.where(X >= 0, 1, 0)
-        backward_output = grad * Hx
+        backward_output = np.multiply(grad, Hx)
         return backward_output
 
 
@@ -240,6 +235,7 @@ class dropout:
         # backward_output = ? (A numpy array of the shape of X, the gradient of the mini-batch loss w.r.t. X)                    #
         # PLEASE follow the formula shown in the homework pdf                                                                    #
         ##########################################################################################################################
+        backward_output = np.multiply(grad, self.mask)
 
         return backward_output
 
