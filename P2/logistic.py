@@ -40,9 +40,9 @@ def binary_train(X, y, w0=None, b0=None, step_size=0.5, max_iterations=1000):
         b = b0
 
     y = np.asarray(y)
+    sigmoid_function = np.vectorize(sigmoid)
     for iteration in range(max_iterations):
         wTxplusb = np.add(np.matmul(X, w), b)
-        sigmoid_function = np.vectorize(sigmoid)
         sig = sigmoid_function(wTxplusb)
         sig_y = np.subtract(sig, y)
         Xsig_y = X * sig_y[:, np.newaxis]
@@ -113,10 +113,12 @@ def multinomial_train(X, y, C,
         b = b0
 
 
-    """
-    TODO: add your code here
-    """
-
+    y_one_hot = np.arrange(N, C)
+    y_one_hot[np.arrange(C), y] = 1
+    gradient = np.exp(np.matmul(X, w)) - y_one_hot
+    X_gradient = X * gradient
+    w = w - step_size * X_gradient.sum(axis=0) / N
+    b = b - step_size * gradient.sum(axis=0) / N
     assert w.shape == (C, D)
     assert b.shape == (C,)
     return w, b
@@ -141,9 +143,7 @@ def multinomial_predict(X, w, b):
     C = w.shape[0]
     preds = np.zeros(N) 
 
-    """
-    TODO: add your code here
-    """   
+    preds = np.argmax(np.matmul(X, w) + b, axis=1)
 
     assert preds.shape == (N,)
     return preds
