@@ -162,7 +162,7 @@ class relu:
         # PLEASE follow the Heaviside step function defined in CSCI567_HW2.pdf                                                   #
         ##########################################################################################################################
         Hx = np.where(X >= 0, 1, 0)
-        backward_output = np.matmul(grad, Hx)
+        backward_output = grad * Hx
         return backward_output
 
 
