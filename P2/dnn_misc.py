@@ -92,7 +92,7 @@ class linear_layer:
 
         W = self.params['W']
         self.gradient['W'] = np.matmul(np.transpose(X), grad) # inputDxoutputD
-        self.gradient['b'] = grad
+        self.gradient['b'] = np.matmul(np.ones((1, len(X))), grad)
         backward_output = np.matmul(grad, np.transpose(W)) # NxinputD
 
         return backward_output
