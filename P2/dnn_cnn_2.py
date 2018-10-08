@@ -161,9 +161,9 @@ def main(main_params):
             # previous and the next modules, respectively                                  #
             ################################################################################
 
-            c2 = model['C2'].forward[m1]
-            h2 = model['nonlinear2'].forward[c2]
-            m2 = model['M2'].forward[h2]
+            c2 = model['C2'].forward(m1)
+            h2 = model['nonlinear2'].forward(c2)
+            m2 = model['M2'].forward(h2)
 
             ################################################################################
             #                            End of TODO (2)                                   #
