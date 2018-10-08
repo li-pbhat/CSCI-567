@@ -211,7 +211,7 @@ def OVR_predict(X, w, b):
     
     preds_c = np.zeros((C, N))
     for c in range(C):
-        preds_c[c] = np.matmul(X, w[c] + b[c])
+        preds_c[c] = np.matmul(X, w[c]) + b[c]
     preds = np.argmax(preds_c, axis=0)
     assert preds.shape == (N,)
     return preds
