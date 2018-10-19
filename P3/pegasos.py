@@ -14,9 +14,12 @@ def objective_function(X, y, w, lamb):
     Return:
     - obj_value: the value of objective function in SVM primal formulation
     """
-    # you need to fill in your solution here
-
-
+    N = X.shape[0]
+    w_norm = np.linalg.norm(w)
+    yn_wT_xn = np.multiply(y, np.matmul(X, w))
+    hinge = 1 - yn_wT_xn
+    hing_avg = np.sum(hing > 0) / N
+    obj_value = (lamb * w_norm * w_norm / 2) + hing_avg
     return obj_value
 
 
@@ -45,10 +48,16 @@ def pegasos_train(Xtrain, ytrain, w, lamb, k, max_iterations):
 
     for iter in range(1, max_iterations + 1):
         A_t = np.floor(np.random.rand(k) * N).astype(int)  # index of the current mini-batch
-
-        # you need to fill in your solution here
-
-
+        A_t_x = np.take(Xtrain, A_t)
+        A_t_y = np.take(ytrain, A_t)
+        A_t_plus_condition = np.where(np.multiply(A_t_y, np.matmul(A_t_x, w)) < 1)
+        A_t_plus_x = A_t_x[A_t_plus_condition]
+        A_t_plus_y = A_t_y[A_t_plus_condition]
+        learning_rate = 1 / (lamb * iter)
+        wt_half = (1 - learning_rate * lamb) * w + learning_rate * np.sum(np.multiply(A_t_plus_y, A_t_plus_x)) / k
+        gradient = 1 / (math.sqrt(lamb) * np.linalg.norm(wt_half))
+        wt_next = (gradient > 1 ? 1 : gradient) * wt_half
+        train_obj.append(objective_function(Xtrain, ytrain, wt_next, lamb))
     return w, train_obj
 
 
@@ -63,9 +72,9 @@ def pegasos_test(Xtest, ytest, w_l):
     Returns:
     - test_acc: testing accuracy.
     """
-    # you need to fill in your solution here
-
-
+    N = Xtest.shape[0]
+    num_correct = Xtest[np.sign(np.multiply(ytest, np.matmul(Xtest, w_l))) >= 0].shape[0]
+    test_acc = num_correct / N
     return test_acc
 
 
