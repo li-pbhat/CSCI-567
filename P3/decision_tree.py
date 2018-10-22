@@ -32,7 +32,7 @@ class DecisionTree(Classifier):
 		print(name + '{')
 		
 		string = ''
-		for idx_cls in node.num_cls:
+		for idx_cls in range(node.num_cls):
 			string += str(node.labels.count(idx_cls)) + ' '
 		print(indent + ' num of sample / cls: ' + string)
 
@@ -85,32 +85,55 @@ class TreeNode(object):
 				               
 				      branches = [[2,2], [4,0]]
 			'''
-			########################################################
-			# TODO: compute the conditional entropy
-			########################################################
-			
+			# compute the conditional entropy
+			branches = np.asarray(branches)
+			totals = np.sum(branches, axis=0)
+			p_yequalsk = branches / totals
+			p_logp = np.array([[-i * np.log2(i) if i > 0 else 0 for i in x] for x in p_yequalsk])
+			entropy = np.sum(p_logp, axis=0)
+			weights = totals / np.sum(totals)
+			entropy_avg = np.sum(entropy * weights)
+			return entropy_avg
 		
 		for idx_dim in range(len(self.features[0])):
-		############################################################
-		# TODO: compare each split using conditional entropy
+		# compare each split using conditional entropy
 		#       find the best split
-		############################################################
+			try:
+				min_entropy
+			except NameError:
+				min_entropy = np.inf
+			xi = np.array(self.features)[:, idx_dim]
+			if None in xi:
+				continue
+			classes = np.unique(xi)
+			branches = np.zeros((self.num_cls, len(classes)))
+			for i, cls in enumerate(classes):
+				y = np.array(self.labels)[np.where(xi == cls)]
+				for yi in y:
+					branches[yi, i] += 1
+			entropy = conditional_entropy(branches)
+			if entropy < min_entropy:
+				min_entropy = entropy
+				self.dim_split = idx_dim
+				self.feature_uniq_split = classes.tolist()
 
-
-
-
-		############################################################
-		# TODO: split the node, add child nodes
-		############################################################
-
-
-
+		# split the node, add child nodes
+		x = np.array(self.features, dtype=object)
+		x[:, self.dim_split] = None
+		xi = np.array(self.features)[:, self.dim_split]
+		for val in self.feature_uniq_split:
+			indexes = np.where(xi == val)
+			x_new = x[indexes].tolist()
+			y_new = np.array(self.labels)[indexes].tolist()
+			child = TreeNode(x_new, y_new, self.num_cls)
+			if len(x_new) == 0 or x_new[0].count(None) == len(x_new[0]):
+				child.splittable = False
+			self.children.append(child)
 
 		# split the child nodes
 		for child in self.children:
 			if child.splittable:
 				child.split()
-
 		return
 
 	def predict(self, feature: List[int]) -> int:

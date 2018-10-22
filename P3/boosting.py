@@ -34,6 +34,10 @@ class Boosting(Classifier):
 		########################################################
 		# TODO: implement "predict"
 		########################################################
+		h = np.zeros(len(features))
+		h = np.sum([beta * np.array(clf.predict(features)) for clf, beta in zip(self.clfs_picked, self.betas)], axis=0)
+		h = np.sign(h)
+		return h.tolist()
 		
 
 class AdaBoost(Boosting):
@@ -51,9 +55,32 @@ class AdaBoost(Boosting):
 		Require:
 		- store what you learn in self.clfs_picked and self.betas
 		'''
-		############################################################
-		# TODO: implement "train"
-		############################################################
+		# implement "train"
+		D = len(labels)
+		w = np.full(D, 1 / D) # start with equal weights
+
+		for t in range(self.T):
+			et = np.inf
+			# pick the classifier with least error for this iteration
+			for clf in self.clfs:
+				h = clf.predict(features)
+				error = np.sum(w * (np.array(labels) != np.array(h)))
+				if error < et:
+					ht = clf
+					et = error
+					htx = h
+			self.clfs_picked.append(ht)
+
+			beta = 0.5 * np.log((1 - et) / et)
+			self.betas.append(beta)
+
+			# update weights based on the new value of beta
+			for n in range(D):
+				w[n] *= np.exp(-beta) if labels[n] == htx[n] else np.exp(beta)
+
+			# normalize weights
+			w /= np.sum(w)
+
 		
 		
 	def predict(self, features: List[List[float]]) -> List[int]:

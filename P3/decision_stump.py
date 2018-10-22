@@ -20,7 +20,8 @@ class DecisionStump(Classifier):
 		Returns:
 		- the prediction (-1 or +1) for each example (in a list)
 		'''
-		##################################################
-		# TODO: implement "predict"
-		##################################################
+		# implement "predict"
+		predictions = np.array(features)[:, self.d]
+		predictions = np.where(predictions > self.b, self.s, -self.s)
+		return predictions
 		

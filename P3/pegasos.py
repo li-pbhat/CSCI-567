@@ -15,11 +15,10 @@ def objective_function(X, y, w, lamb):
     - obj_value: the value of objective function in SVM primal formulation
     """
     N = X.shape[0]
-    w_norm = np.linalg.norm(w)
-    yn_wT_xn = np.multiply(y, np.matmul(X, w))
-    hinge = 1 - yn_wT_xn
-    hing_avg = np.sum(hing > 0) / N
-    obj_value = (lamb * w_norm * w_norm / 2) + hing_avg
+    w_norm = np.sum(w ** 2)
+    loss = 1 - y * np.squeeze(X.dot(w), axis=1)
+    loss[loss < 0] = 0 # min(0, loss)
+    obj_value = (lamb / 2 * w_norm) + np.mean(loss)
     return obj_value
 
 
@@ -48,16 +47,21 @@ def pegasos_train(Xtrain, ytrain, w, lamb, k, max_iterations):
 
     for iter in range(1, max_iterations + 1):
         A_t = np.floor(np.random.rand(k) * N).astype(int)  # index of the current mini-batch
-        A_t_x = np.take(Xtrain, A_t)
-        A_t_y = np.take(ytrain, A_t)
-        A_t_plus_condition = np.where(np.multiply(A_t_y, np.matmul(A_t_x, w)) < 1)
-        A_t_plus_x = A_t_x[A_t_plus_condition]
-        A_t_plus_y = A_t_y[A_t_plus_condition]
+
+        A_t_x = Xtrain[A_t]
+        A_t_y = ytrain[A_t]
+        A_t_ywtx = A_t_y * np.squeeze(A_t_x.dot(w), axis=1)
+
+        A_t_plus = np.where(A_t_ywtx < 1)
+        A_t_plus_x = A_t_x[A_t_plus]
+        A_t_plus_y = A_t_y[A_t_plus]
         learning_rate = 1 / (lamb * iter)
-        wt_half = (1 - learning_rate * lamb) * w + learning_rate * np.sum(np.multiply(A_t_plus_y, A_t_plus_x)) / k
-        gradient = 1 / (math.sqrt(lamb) * np.linalg.norm(wt_half))
-        wt_next = (gradient > 1 ? 1 : gradient) * wt_half
-        train_obj.append(objective_function(Xtrain, ytrain, wt_next, lamb))
+
+        w *= (1 - learning_rate * lamb)
+        w += learning_rate / k * np.expand_dims(np.sum(np.expand_dims(A_t_plus_y, axis=1) * A_t_plus_x, axis=0), axis=1)
+        w *= min(1, 1 / (np.sqrt(lamb) * np.sqrt(np.sum(w ** 2))))
+
+        train_obj.append(objective_function(Xtrain, ytrain, w, lamb))
     return w, train_obj
 
 
@@ -72,9 +76,11 @@ def pegasos_test(Xtest, ytest, w_l):
     Returns:
     - test_acc: testing accuracy.
     """
-    N = Xtest.shape[0]
-    num_correct = Xtest[np.sign(np.multiply(ytest, np.matmul(Xtest, w_l))) >= 0].shape[0]
-    test_acc = num_correct / N
+    Xtest = np.asarray(Xtest)
+    ytest = np.asarray(ytest)
+    wtx = np.squeeze(Xtest.dot(w_l), axis=1)
+    predictions = [-1 if yi < 0 else 1 for yi in wtx]
+    test_acc = np.mean(np.array(ytest) == np.array(predictions))
     return test_acc
 
 
