@@ -56,7 +56,7 @@ class GMM():
                 x_mk = x - self.means[k]
                 x_mk = x_mk[membership == k] # to avoid multiplying by gamma since most of the array is 0
                 self.variances[k] = np.dot(np.transpose(x_mk), x_mk) / Nk[k]
-            self.pi = Nk / N
+            self.pi_k = Nk / N
             # DONOT MODIFY CODE BELOW THIS LINE
 
         elif (self.init == 'random'):
@@ -81,7 +81,39 @@ class GMM():
         # - Return the number of E/M-Steps executed (Int)
         # Hint: Try to separate E & M step for clarity
         # DONOT MODIFY CODE ABOVE THIS LINE
-        raise Exception('Implement fit function (filename: gmm.py)')
+        def getSigmaPrime(sigma):
+            sigma_prime = np.copy(sigma)
+            while (np.linalg.matrix_rank(sigma_prime) < D):
+                sigma_prime = sigma_prime + 0.001 * np.identity(D)
+            return sigma_prime
+        def getGamma(mu, variance, pi):
+            det = np.linalg.det(variance)
+            denom = np.sqrt((2 * np.pi) ** D * det)
+            f = np.exp(-0.5 * np.sum(np.multiply(np.dot(x - mu, np.linalg.inv(variance)), x - mu), axis=1)) / denom
+            return pi * f
+        iter = 0
+        log_likelihood = -np.inf
+        gamma = np.zeros((N, self.n_cluster))
+        while iter < self.max_iter:
+            # E
+            for k in range(self.n_cluster):
+                mu_k = self.means[k]
+                variance_k = getSigmaPrime(self.variances[k])
+                gamma[:, k] = getGamma(mu_k, variance_k, self.pi_k[k])
+            log_likelihood_new = np.sum(np.log(np.sum(gamma, axis=1)))
+            gamma = (gamma.T / np.sum(gamma, axis=1)).T
+            Nk = np.sum(gamma, axis=0)
+
+            #M
+            for k in range(self.n_cluster):
+                self.means[k] = np.transpose(np.sum(gamma[:, k] * np.transpose(x), axis=1)) / Nk[k]
+                self.variances[k] = np.dot(np.multiply(np.transpose(x - self.means[k]), gamma[:, k]), x - self.means[k]) / Nk[k]
+            self.pi_k = Nk / N
+            if (np.abs(log_likelihood - log_likelihood_new) <= self.e):
+                break
+            log_likelihood = log_likelihood_new
+            iter += 1
+        return iter
         # DONOT MODIFY CODE BELOW THIS LINE
 
 
@@ -104,7 +136,13 @@ class GMM():
         # - return the samples
 
         # DONOT MODIFY CODE ABOVE THIS LINE
-        raise Exception('Implement sample function in gmm.py')
+        D = self.means.shape[1]
+        samples = np.zeros((N, D))
+        random_k = np.random.choice(self.n_cluster, N, p=self.pi_k)
+        for i in range(len(random_k)):
+            mu = self.means[random_k[i]]
+            variance = self.variances[random_k[i]]
+            samples[i] = np.random.multivariate_normal(mu, variance) # draw a sample from gaussian distribution
         # DONOT MODIFY CODE BELOW THIS LINE
         return samples
 
@@ -128,7 +166,26 @@ class GMM():
         # - return the log-likelihood (Float)
         # Note: you can call this function in fit function (if required)
         # DONOT MODIFY CODE ABOVE THIS LINE
-        raise Exception('Implement compute_log_likelihood function in gmm.py')
+        
+        # Ideally there could be only one copy of these functions.
+        # But since there is a constraint that we cannot modify code beyong the given scope, I had to duplicate this method inline.
+        N, D = x.shape
+        def getSigmaPrime(sigma):
+            sigma_prime = np.copy(sigma)
+            while (np.linalg.matrix_rank(sigma_prime) < D):
+                sigma_prime = sigma_prime + 0.001 * np.identity(D)
+            return sigma_prime
+        def getGamma(mu, variance, pi):
+            det = np.linalg.det(variance)
+            denom = np.sqrt((2 * np.pi) ** D * det)
+            f = np.exp(-0.5 * np.sum(np.multiply(np.dot(x - mu, np.linalg.inv(variance)), x - mu), axis=1)) / denom
+            return pi * f
+        gamma = np.zeros((N, self.n_cluster))
+        for k in range(self.n_cluster):
+            mu_k = means[k]
+            variance_k = getSigmaPrime(variances[k])
+            gamma[:, k] = getGamma(mu_k, variance_k, self.pi_k[k])
+        log_likelihood = float(np.sum(np.log(np.sum(gamma, axis=1))))
         # DONOT MODIFY CODE BELOW THIS LINE
         return log_likelihood
 
@@ -157,7 +214,6 @@ class GMM():
                 variance = variance + 0.001 * np.identity(D)
             self.inv = np.linalg.inv(variance)
             self.c = np.pow(2*np.pi, D) * np.linalg.det(variance)
-            print(self.c)
             # DONOT MODIFY CODE BELOW THIS LINE
 
         def getLikelihood(self,x):
@@ -177,6 +233,5 @@ class GMM():
             # DONOT MODIFY CODE ABOVE THIS LINE
             x_mean = x - self.mean
             p = np.exp(np.matmul(np.matmul(-0.5 * x_mean, self.inv), np.transpose(x_mean) / np.sqrt(self.c)))
-            print(p)
             # DONOT MODIFY CODE BELOW THIS LINE
             return p
