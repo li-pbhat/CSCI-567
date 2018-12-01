@@ -54,7 +54,7 @@ def backward(pi, A, B, O):
   ###################################################
   for s in range(S):
     beta[s, N-1] = 1
-  for t in range(N -1, 0):
+  for t in reversed(range(N - 1)):
     for s in range(S):
       beta[s, t] = sum([A[s, s_prime] * B[s_prime, O[t + 1]] * beta[s_prime, t + 1] for s_prime in range(S)])
   
@@ -133,7 +133,7 @@ def viterbi(pi, A, B, O):
       delta[s, t] = B[s, O[t]] * max(delta_args)
       delta_uppercase[s, t] = np.argmax(delta_args)
   path.append(np.argmax(delta[:, N-1]))
-  for t in (range(N - 1, 0)):
+  for t in reversed(range(N - 1)):
     path.append(delta_uppercase[path[t-1], t])
   path = reversed(path)
   return path
