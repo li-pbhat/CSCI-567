@@ -27,8 +27,6 @@ def forward(pi, A, B, O):
   for t in range(1, N):
     for s in range(S):
       alpha[s, t] = B[s, O[t]] * sum([A[s_prime, s] * alpha[s_prime, t-1] for s_prime in range(S)])
-  print("alpha:")
-  print(alpha)
 
   return alpha
 
@@ -58,8 +56,6 @@ def backward(pi, A, B, O):
     for s in range(S):
       beta[s, t] = sum([A[s, s_prime] * B[s_prime, O[t + 1]] * beta[s_prime, t + 1] for s_prime in range(S)])
   
-  print("beta:")
-  print(beta)
   return beta
 
 def seqprob_forward(alpha):
@@ -134,7 +130,7 @@ def viterbi(pi, A, B, O):
       delta_uppercase[s, t] = np.argmax(delta_args)
   path.append(np.argmax(delta[:, N-1]))
   for t in reversed(range(N - 1)):
-    path.append(delta_uppercase[path[t-1], t])
+    path.append(delta_uppercase[path[N-1], t])
   path = reversed(path)
   return path
 
