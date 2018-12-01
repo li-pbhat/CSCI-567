@@ -22,6 +22,11 @@ def forward(pi, A, B, O):
   ###################################################
   # Q3.1 Edit here
   ###################################################
+  for s in range(S):
+    alpha[s, 0] = pi[s] * B[s, O[0]]
+  for t in range(1, N):
+    for s in range(S):
+      alpha[s, t] = B[s, O[t]] * sum([A[s_prime, s] * alpha[s_prime, t-1] for s_prime in range(S)]) 
 
   return alpha
 
@@ -45,6 +50,11 @@ def backward(pi, A, B, O):
   ###################################################
   # Q3.1 Edit here
   ###################################################
+  for s in range(S):
+    beta[s, N-1] = 1
+  for t in range(N -1, 0):
+    for s in range(S):
+      beta[s, t] = sum([A[s, s_prime] * B[s_prime, O[t + 1]] * beta[s_prime, t + 1] for s_prime in range(S)])
   
   return beta
 
@@ -62,6 +72,7 @@ def seqprob_forward(alpha):
   ###################################################
   # Q3.2 Edit here
   ###################################################
+  prob = sum(alpha[:, -1]) # since beta[s, T] = 1 
   
   return prob
 
@@ -84,6 +95,8 @@ def seqprob_backward(beta, pi, B, O):
   ###################################################
   # Q3.2 Edit here
   ###################################################
+  S = len(pi)
+  prob = sum([beta[s, 0] * pi[s] * B[s, O[0]] for s in range(S)])
   
   return prob
 
@@ -104,7 +117,21 @@ def viterbi(pi, A, B, O):
   ###################################################
   # Q3.3 Edit here
   ###################################################
-  
+  S = len(pi)
+  N = len(O)
+  delta = np.zeros([S, N])
+  delta_uppercase = np.zeros([S, N])
+  for s in range(S):
+    delta[s, 0] = pi[s] * B[s, O[0]]
+  for t in range(1, N):
+    for s in range(S):
+      delta_args = [A[s_prime, s] * delta[s_prime, t-1] for s_prime in range(S)]
+      delta[s, t] = B[s, O[t]] * max(delta_args)
+      delta_uppercase[s, t] = np.argmax(delta_args)
+  path.append(np.argmax(delta[:, N-1]))
+  for t in (range(N - 1, 0)):
+    path.append(delta_uppercase[path[t-1], t])
+  path = reversed(path)
   return path
 
 
