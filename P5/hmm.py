@@ -120,23 +120,19 @@ def viterbi(pi, A, B, O):
   S = len(pi)
   N = len(O)
   delta = np.zeros([S, N])
-  paths = np.zeros([S, N], dtype="int")
-  
-  for j in range(S):
-    delta[j, 0] = pi[j] * B[j, O[0]]
-    paths[j, 0] = 0
-  
+  delta_uppercase = np.zeros([S, N], dtype="int")
+  for s in range(S):
+    delta[s, 0] = pi[s] * B[s, O[0]]
   for t in range(1, N):
-    for j in range(S):
-      deltas = [delta[i, t - 1] * A[i, j] * B[j, O[t]] for i in range(S)]
-      delta[j, t] = max(deltas)
-      paths[j, t] = np.argmax(deltas)
-  
+    for s in range(S):
+      delta_args = [A[s_prime, s] * delta[s_prime, t-1] * B[s, O[t]] for s_prime in range(S)]
+      delta[s, t] = max(delta_args)
+      delta_uppercase[s, t] = np.argmax(delta_args)
   path.append(np.argmax(delta[:, -1]))
+  print(path)
   for t in reversed(range(N - 1)):
-    path.append(paths[path[-1], t])
+    path.append(delta_uppercase[path[-1], t])
   path = reversed(path)
-  
   return path
 
 
