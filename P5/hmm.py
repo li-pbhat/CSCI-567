@@ -130,7 +130,7 @@ def viterbi(pi, A, B, O):
       delta_uppercase[s, t] = np.argmax(delta_args)
   path.append(np.argmax(delta[:, N-1]))
   for t in reversed(range(N - 1)):
-    path.append(delta_uppercase[path[N-1], t])
+    path.append(delta_uppercase[path[-1], t])
   path = reversed(path)
   return path
 
