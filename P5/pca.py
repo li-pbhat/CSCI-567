@@ -21,6 +21,13 @@ def pca(X = np.array([]), no_dims = 50):
     M = np.array([])
 
     """TODO: write your code here"""
+    XtX = np.cov(X.T)
+    eigenvalues, eigenvectors = np.linalg.eig(XtX)
+    sorted_eigenvalue_indices = np.argsort(eigenvalues)
+    top_eignvalue_indices = sorted_eigenvalue_indices[:no_dims]
+    V = eigenvectors[top_eignvalue_indices, :]
+    Y = np.matmul(X, V.T)
+    M = V.T
     
     return Y, M
 
@@ -42,6 +49,7 @@ def decompress(Y = np.array([]), M = np.array([])):
     X_hat = np.array([])
 
     """TODO: write your code here"""
+    X_hat = np.matmul(Y, M.T)
     
     return X_hat
 
@@ -56,6 +64,8 @@ def reconstruction_error(orig = np.array([]), decompressed = np.array([])):
     error = 0
 
     """TODO: write your code here"""
+    D = orig.shape[0]
+    error = (1/D) * np.power(np.linalg.norm(orig - decompressed), 2)
     
     return error
 
