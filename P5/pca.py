@@ -23,11 +23,11 @@ def pca(X = np.array([]), no_dims = 50):
     """TODO: write your code here"""
     XtX = np.cov(X.T)
     eigenvalues, eigenvectors = np.linalg.eig(XtX)
-    sorted_eigenvalue_indices = np.argsort(eigenvalues)
-    top_eignvalue_indices = sorted_eigenvalue_indices[:no_dims]
-    V = eigenvectors[top_eignvalue_indices, :]
-    Y = np.matmul(X, V.T)
-    M = V.T
+    sorted_eigenvalue_indices = np.flip(np.argsort(eigenvalues))
+    top_eigenvalue_indices = sorted_eigenvalue_indices[:no_dims]
+    M = eigenvectors[:, top_eigenvalue_indices]
+    P = np.dot(M.T, X.T)
+    Y = P.T
     
     return Y, M
 
